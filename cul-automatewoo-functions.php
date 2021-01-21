@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A plugin that adds collection information to the woocommerce subscription edit page
+ * A Plugin that adds CUL's Custom functions to AutomateWoo
  *
  * @package cul-automatewoo-functions
  *
