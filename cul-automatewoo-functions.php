@@ -136,3 +136,111 @@ function my_automatewoo_subscrition_status_finalized_offer( $workflow ) {
     //Automatewoo log
     $workflow->log_action_note( $workflow , __( 'subscription moved to finalized with offer (expired-offer) with order id:'.$order_id. ' and offer id: '.$offer_id.' Subscription id: '.$subscription_id, 'automatewoo' ) );
 }
+
+/**
+ * Custom function to record late payments over 30 days on user and subscription meta
+ * Adds aw_late_payments to postmeta
+ * Adds aw_total_late_payments to usermeta
+ * @param $workflow AutomateWoo\Workflow
+ */
+function my_automatewoo_subscrition_add_late_payment_meta( $workflow ) {
+    //get subscription id from data layer
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_id = $subscription->id;
+    $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
+
+    // Adds aw_late_payments postmeta to the subscription
+    if(metadata_exists('post', $subscription_id, 'aw_late_payments')){
+        echo $late_payments = get_post_meta($subscription->id, 'aw_late_payments', true ) + 1;
+        update_post_meta( $subscription->id, 'aw_late_payments', $late_payments );
+    }
+
+    else {
+        add_post_meta( $subscription->id, 'aw_late_payments', 1 );
+    }
+
+    // Adds aw_total_late_payments meta to the user
+    if(metadata_exists('user', $user_id, 'aw_total_late_payments')){
+        $user_late_payments = get_user_meta($user_id, 'aw_total_late_payments', true ) + 1;
+        update_user_meta( $user_id, 'aw_total_late_payments', $late_payments );
+    }
+    else {
+        add_user_meta( $user_id, 'aw_total_late_payments', 1 );
+    }
+
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'Late Payment Recorded in usermeta and postmeta', 'automatewoo' ) );
+    
+}
+
+/**
+ * Custom function to record late payments over 60 days on user and subscription meta
+ * Adds aw_late_payments to postmeta
+ * Adds aw_total_late_payments to usermeta
+ * @param $workflow AutomateWoo\Workflow
+ */
+function my_automatewoo_subscrition_add_late_payment_60_meta( $workflow ) {
+    //get subscription id from data layer
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_id = $subscription->id;
+    $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
+
+    // Adds aw_late_payments postmeta to the subscription
+    if(metadata_exists('post', $subscription_id, 'aw_late_payments_60')){
+        $late_payments = get_post_meta($subscription->id, 'aw_late_payments_60', true ) + 1;
+        update_post_meta( $subscription->id, 'aw_late_payments_60', $late_payments);
+    }
+
+    else {
+        add_post_meta( $subscription->id, 'aw_late_payments_60', 1 );
+    }
+
+    // Adds aw_total_late_payments meta to the user
+    if(metadata_exists('user', $user_id, 'aw_total_late_payments_60')){
+        $user_late_payments = get_user_meta($user_id, 'aw_total_late_payments_60', true ) + 1;
+        update_user_meta( $user_id, 'aw_total_late_payments_60', $late_payments );
+    }
+    else {
+        add_user_meta( $user_id, 'aw_total_late_payments_60', 1 );
+    }
+
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'Late Payment 60 Recorded in usermeta and postmeta', 'automatewoo' ) );
+    
+}
+
+/**
+ * Custom function to record late payments over 90 days on user and subscription meta
+ * Adds aw_late_payments to postmeta
+ * Adds aw_total_late_payments to usermeta
+ * @param $workflow AutomateWoo\Workflow
+ */
+function my_automatewoo_subscrition_add_late_payment_90_meta( $workflow ) {
+    //get subscription id from data layer
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_id = $subscription->id;
+    $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
+
+    // Adds aw_late_payments postmeta to the subscription
+    if(metadata_exists('post', $subscription_id, 'aw_late_payments_90')){
+        $late_payments = get_post_meta($subscription->id, 'aw_late_payments_90', true ) + 1;
+        update_post_meta( $subscription->id, 'aw_late_payments_90', $late_payments );
+    }
+
+    else {
+        add_post_meta( $subscription->id, 'aw_late_payments_90', 1 );
+    }
+
+    // Adds aw_total_late_payments meta to the user
+    if(metadata_exists('user', $user_id, 'aw_total_late_payments_90')){
+        $user_late_payments = get_user_meta($user_id, 'aw_total_late_payments_90', true ) + 1;
+        update_user_meta( $user_id, 'aw_total_late_payments_90', $late_payments );
+    }
+    else {
+        add_user_meta( $user_id, 'aw_total_late_payments_90', 1 );
+    }
+
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'Late Payment 90 Recorded in usermeta and postmeta', 'automatewoo' ) );
+    
+}
