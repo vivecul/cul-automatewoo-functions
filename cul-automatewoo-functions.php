@@ -102,7 +102,7 @@ function my_automatewoo_subscription_length_meta( $workflow ) {
     $subscription = $workflow->data_layer()->get_subscription();
     $subscription_length = wcs_estimate_periods_between( $subscription->get_time( 'start' ), $subscription->get_time( 'end' ), $subscription->get_billing_period() );
     
-    add_post_meta( $subscription->id, 'aw_subscription_length', $subscription_length, true );
+    add_post_meta( $subscription->get_id(), 'aw_subscription_length', $subscription_length, true );
 
     $workflow->log_action_note( $workflow , __( 'subscription length is: '.$subscription_length, 'automatewoo' ) );
 }
@@ -115,11 +115,11 @@ function my_automatewoo_subscription_length_meta( $workflow ) {
 function my_automatewoo_subscrition_status_finalized_offer( $workflow ) {
     //get order id from data layer
     $order = $workflow->data_layer()->get_order();
-    $order_id = $order->id;
+    $order_id = $order->get_id();
     
     // get offer id from order
     global $wpdb;
-    $offer_ids_query = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'offer_order_id' AND meta_value = $order->id");
+    $offer_ids_query = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'offer_order_id' AND meta_value = $order_id");
     $offer_id = $offer_ids_query[0]->post_id;
 
     //get sub id from postmeta of offer
@@ -146,17 +146,17 @@ function my_automatewoo_subscrition_status_finalized_offer( $workflow ) {
 function my_automatewoo_subscrition_add_late_payment_meta( $workflow ) {
     //get subscription id from data layer
     $subscription = $workflow->data_layer()->get_subscription();
-    $subscription_id = $subscription->id;
+    $subscription_id = $subscription->get_id();
     $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
 
     // Adds aw_late_payments postmeta to the subscription
     if(metadata_exists('post', $subscription_id, 'aw_late_payments')){
-        echo $late_payments = get_post_meta($subscription->id, 'aw_late_payments', true ) + 1;
-        update_post_meta( $subscription->id, 'aw_late_payments', $late_payments );
+        echo $late_payments = get_post_meta($subscription->get_id(), 'aw_late_payments', true ) + 1;
+        update_post_meta( $subscription->get_id(), 'aw_late_payments', $late_payments );
     }
 
     else {
-        add_post_meta( $subscription->id, 'aw_late_payments', 1 );
+        add_post_meta( $subscription->get_id(), 'aw_late_payments', 1 );
     }
 
     // Adds aw_total_late_payments meta to the user
@@ -182,17 +182,17 @@ function my_automatewoo_subscrition_add_late_payment_meta( $workflow ) {
 function my_automatewoo_subscrition_add_late_payment_60_meta( $workflow ) {
     //get subscription id from data layer
     $subscription = $workflow->data_layer()->get_subscription();
-    $subscription_id = $subscription->id;
+    $subscription_id = $subscription->get_id();
     $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
 
     // Adds aw_late_payments postmeta to the subscription
     if(metadata_exists('post', $subscription_id, 'aw_late_payments_60')){
-        $late_payments = get_post_meta($subscription->id, 'aw_late_payments_60', true ) + 1;
-        update_post_meta( $subscription->id, 'aw_late_payments_60', $late_payments);
+        $late_payments = get_post_meta($subscription->get_id(), 'aw_late_payments_60', true ) + 1;
+        update_post_meta( $subscription->get_id(), 'aw_late_payments_60', $late_payments);
     }
 
     else {
-        add_post_meta( $subscription->id, 'aw_late_payments_60', 1 );
+        add_post_meta( $subscription->get_id(), 'aw_late_payments_60', 1 );
     }
 
     // Adds aw_total_late_payments meta to the user
@@ -218,17 +218,17 @@ function my_automatewoo_subscrition_add_late_payment_60_meta( $workflow ) {
 function my_automatewoo_subscrition_add_late_payment_90_meta( $workflow ) {
     //get subscription id from data layer
     $subscription = $workflow->data_layer()->get_subscription();
-    $subscription_id = $subscription->id;
+    $subscription_id = $subscription->get_id();
     $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
 
     // Adds aw_late_payments postmeta to the subscription
     if(metadata_exists('post', $subscription_id, 'aw_late_payments_90')){
-        $late_payments = get_post_meta($subscription->id, 'aw_late_payments_90', true ) + 1;
-        update_post_meta( $subscription->id, 'aw_late_payments_90', $late_payments );
+        $late_payments = get_post_meta($subscription->get_id(), 'aw_late_payments_90', true ) + 1;
+        update_post_meta( $subscription->get_id(), 'aw_late_payments_90', $late_payments );
     }
 
     else {
-        add_post_meta( $subscription->id, 'aw_late_payments_90', 1 );
+        add_post_meta( $subscription->get_id(), 'aw_late_payments_90', 1 );
     }
 
     // Adds aw_total_late_payments meta to the user
