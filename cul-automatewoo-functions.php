@@ -62,31 +62,36 @@ function my_automatewoo_change_late_payment_status( $workflow ) {
         $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to active', 'automatewoo' ) );
     }
     else if ($pending_order_count == 1) {
+        $sub->update_status( 'on-hold' );
+        $sub->add_order_note( __( 'AutomateWoo Change Late Payment Status.', 'woocommerce-subscriptions' ), false, true );
+        $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to on-hold', 'automatewoo' ) );
+    }
+    else if ($pending_order_count == 2) {
         $sub->update_status( 'late-payment-30' );
         $sub->add_order_note( __( 'AutomateWoo Change Late Payment Status.', 'woocommerce-subscriptions' ), false, true );
         $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to late-payment-30', 'automatewoo' ) );
     }
-    else if ($pending_order_count == 2) {
+    else if ($pending_order_count == 3) {
         $sub->update_status( 'late-payment-60' );
         $sub->add_order_note( __( 'AutomateWoo Change Late Payment Status.', 'woocommerce-subscriptions' ), false, true );
         $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to late-payment-60', 'automatewoo' ) );
     }
-    else if ($pending_order_count == 3) {
+    else if ($pending_order_count == 4) {
         $sub->update_status( 'late-payment-90' );
         $sub->add_order_note( __( 'AutomateWoo Change Late Payment Status.', 'woocommerce-subscriptions' ), false, true );
         $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to late-payment-90', 'automatewoo' ) );
     }
-    else if ($pending_order_count == 4) {
+    else if ($pending_order_count == 5) {
         $sub->update_status( 'late-payment-120' );
         $sub->add_order_note( __( 'AutomateWoo Change Late Payment Status.', 'woocommerce-subscriptions' ), false, true );
         $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to late-payment-120', 'automatewoo' ) );
     }
-    else if ($pending_order_count == 5) {
+    else if ($pending_order_count == 6) {
         $sub->update_status( 'late-payment-150' );
         $sub->add_order_note( __( 'AutomateWoo Change Late Payment Status.', 'woocommerce-subscriptions' ), false, true );
         $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to late-payment-150', 'automatewoo' ) );
     }
-    else if ($pending_order_count == 6) {
+    else if ($pending_order_count == 7) {
         $sub->update_status( 'late-payment-180' );
         $sub->add_order_note( __( 'AutomateWoo Change Late Payment Status.', 'woocommerce-subscriptions' ), false, true );
         $workflow->log_action_note( $workflow , __( 'Late Payment order paid Subscription status changed to late-payment-180', 'automatewoo' ) );
