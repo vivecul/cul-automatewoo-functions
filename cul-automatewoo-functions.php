@@ -260,7 +260,7 @@ function update_next_payment_date( $workflow ) {
     $subscription_id = $subscription->get_id();
     $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
 
-    $new_payment_date = get_post_meta($subscription_id, 'aw_next_date', true);
+    $new_payment_date = get_post_meta($subscription_id, 'aw_next_payment', true);
 
     if(metadata_exists('post', $subscription_id, 'aw_next_payment')){
         $subscription->update_dates(array('next_payment' => $new_payment_date));
