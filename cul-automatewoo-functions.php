@@ -249,3 +249,28 @@ function my_automatewoo_subscrition_add_late_payment_90_meta( $workflow ) {
     $workflow->log_action_note( $workflow , __( 'Late Payment 90 Recorded in usermeta and postmeta', 'automatewoo' ) );
     
 }
+
+/***
+** Functions that sets the next payment date one month after the renewal order was creted
+** Uses saved data in aw_next_payment
+***/
+function update_next_payment_date( $workflow ) {
+    //get subscription id from data layer
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_id = $subscription->get_id();
+    $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
+
+    $new_payment_date = get_post_meta($subscription_id, 'aw_next_date', true);
+
+    if(metadata_exists('post', $subscription_id, 'aw_next_date')){
+        $subscription->update_dates(array('next_payment' => $new_payment_date));
+        //Automatewoo log
+        $workflow->log_action_note( $workflow , __( 'next payment updated to: '.$new_payment_date, 'automatewoo' ) );
+    }
+    else{
+        //Automatewoo log
+        $workflow->log_action_note( $workflow , __( 'next payment not updated', 'automatewoo' ) );
+    }
+    
+    
+}
