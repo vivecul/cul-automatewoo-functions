@@ -262,14 +262,14 @@ function update_next_payment_date( $workflow ) {
 
     $new_payment_date = get_post_meta($subscription_id, 'aw_next_date', true);
 
-    if(metadata_exists('post', $subscription_id, 'aw_next_date')){
+    if(metadata_exists('post', $subscription_id, 'aw_next_payment')){
         $subscription->update_dates(array('next_payment' => $new_payment_date));
         //Automatewoo log
-        $workflow->log_action_note( $workflow , __( 'next payment updated to: '.$new_payment_date, 'automatewoo' ) );
+        $workflow->log_action_note( $workflow , __( 'Next payment date updated to: '.$new_payment_date, 'automatewoo' ) );
     }
     else{
         //Automatewoo log
-        $workflow->log_action_note( $workflow , __( 'next payment not updated', 'automatewoo' ) );
+        $workflow->log_action_note( $workflow , __( 'Next payment date not updated', 'automatewoo' ) );
     }
     
     
