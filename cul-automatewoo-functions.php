@@ -258,19 +258,14 @@ function update_next_payment_date( $workflow ) {
     //get subscription id from data layer
     $subscription = $workflow->data_layer()->get_subscription();
     $subscription_id = $subscription->get_id();
-    $user_id = get_metadata( 'post', $subscription_id, '_customer_user', true );
-
-    $new_payment_date = get_post_meta($subscription_id, 'aw_next_payment', true);
-
-    if(metadata_exists('post', $subscription_id, 'aw_next_payment')){
-        $subscription->update_dates(array('next_payment' => $new_payment_date));
-        //Automatewoo log
-        $workflow->log_action_note( $workflow , __( 'Next payment date updated to: '.$new_payment_date, 'automatewoo' ) );
-    }
-    else{
-        //Automatewoo log
-        $workflow->log_action_note( $workflow , __( 'Next payment date not updated', 'automatewoo' ) );
-    }
     
+    $next_month = date("Y-m-d", strtotime("+1 month")).' 12:00:00';
+
     
+    $subscription->update_dates(array('next_payment' => $next_month);
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'Next payment date updated to: '.$next_month, 'automatewoo' ) );
+    //Leave note
+    $subscription->add_order_note('Next payment date updated to: '.$next_month);
+       
 }
