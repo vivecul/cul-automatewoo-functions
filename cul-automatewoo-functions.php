@@ -262,7 +262,7 @@ function update_next_payment_date( $workflow ) {
     $next_month = date("Y-m-d", strtotime("+1 month")).' 12:00:00';
 
     
-    $subscription->update_dates(array('next_payment' => $next_month);
+    $subscription->update_dates(array('next_payment' => $next_month));
     //Automatewoo log
     $workflow->log_action_note( $workflow , __( 'Next payment date updated to: '.$next_month, 'automatewoo' ) );
     //Leave note
