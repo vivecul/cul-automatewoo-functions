@@ -259,7 +259,8 @@ function update_next_payment_date( $workflow ) {
     $subscription = $workflow->data_layer()->get_subscription();
     $subscription_id = $subscription->get_id();
     
-    $next_month = date("Y-m-d", strtotime("+1 month")).' 12:00:00';
+    //Sets nex payment time 1 month later minus 5 hours to account for server time and payment won't go to the next day if created after 19h
+    $next_month = date("Y-m-d", strtotime("+1 month -5 hour")).' 12:00:00';
 
     
     $subscription->update_dates(array('next_payment' => $next_month));
