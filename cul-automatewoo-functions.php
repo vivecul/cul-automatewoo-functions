@@ -270,3 +270,20 @@ function update_next_payment_date( $workflow ) {
     $subscription->add_order_note('Next payment date updated to: '.$next_month);
        
 }
+
+function update_next_end_date_4_months( $workflow ) {
+    //get subscription id from data layer
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_id = $subscription->get_id();
+    
+    //Sets nex payment time 1 month later minus 5 hours to account for server time and payment won't go to the next day if created after 19h
+    $end_date = date("Y-m-d", strtotime("+4 month -5 hour")).' 12:00:00';
+
+    
+    $subscription->update_dates(array('end' => $end_date));
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'End date updated to: '.$end_date, 'automatewoo' ) );
+    //Leave note
+    $subscription->add_order_note('End date updated to: '.$next_month);
+       
+}
