@@ -267,23 +267,95 @@ function update_next_payment_date( $workflow ) {
     //Automatewoo log
     $workflow->log_action_note( $workflow , __( 'Next payment date updated to: '.$next_month, 'automatewoo' ) );
     //Leave note
-    $subscription->add_order_note('Next payment date updated to: '.$next_month);
+    //$subscription->add_order_note('Next payment date updated to: '.$next_month);
        
 }
 
-function update_next_end_date_4_months( $workflow ) {
+function update_next_end_date_for_rescubscribe( $workflow ) {
     //get subscription id from data layer
     $subscription = $workflow->data_layer()->get_subscription();
     $subscription_id = $subscription->get_id();
+
+    //Get Marketplace renter
+    if(metadata_exists('post', $subscription_id, 'aw_mp_renter')){
+        $mp_renter = get_metadata( 'post', $subscription_id, 'aw_mp_renter', true );
+    }
+    else {
+        $mp_renter = 'cul';
+    }
     
-    //Sets nex payment time 1 month later minus 5 hours to account for server time and payment won't go to the next day if created after 19h
-    $end_date = date("Y-m-d", strtotime("+4 month -5 hour")).' 12:00:00';
+    //Get subscription length
+    if(metadata_exists('post', $subscription_id, 'aw_subscription_length')){
+        $subscription_length = get_metadata( 'post', $subscription_id, 'aw_subscription_length', true );
+    }
+    else {
+        $subscription_length = 'aw_error';
+    }
+
+    // Get al rules for non marketplace and each marketplace player
+    /*
+    * Rules for CUL (non marketplace)
+    * 6 Months resubscribes 6 months
+    * 9 Months resubscribes 5 months 
+    * 12 Months resubscribes 4 months 
+    * 18 Months resubscribes to 0 months 
+    **/
+    if ($mp_renter == 'cul'){
+        
+        if ($subscription_length == '6'){
+            $resubscription_months = 6;
+        }
+        else if ($subscription_length == '9'){
+            $resubscription_months = 5;
+        }
+        else if ($subscription_length == '12'){
+            $resubscription_months = 4;
+        }
+    }
+    // Get al rules for non marketplace and each marketplace player
+    /*
+    * Rules for Rayco (marketplace)
+    * 6 Months resubscribes 6 months
+    * 9 Months resubscribes 5 months 
+    * 12 Months resubscribes 4 months 
+    * 18 Months resubscribes to 4 months 
+    * 24 Months resubscribes to 4 months 
+    * 30 Months resubscribes to 4 months 
+    **/
+    else if ($mp_renter == 'rayco'){
+        
+        if ($subscription_length == '6'){
+            $resubscription_months = 6;
+        }
+        else if ($subscription_length == '9'){
+            $resubscription_months = 5;
+        }
+        else if ($subscription_length == '12'){
+            $resubscription_months = 4;
+        }
+        else if ($subscription_length == '18'){
+            $resubscription_months = 4;
+        }
+        else if ($subscription_length == '24'){
+            $resubscription_months = 4;
+        }
+        else if ($subscription_length == '34'){
+            $resubscription_months = 4;
+        }
+    }
+
+    //Sets new post_meta with resubscription current time
+    update_post_meta( $subscription_id, 'aw_subscription_length', $resubscription_months );
+    add_post_meta( $subscription_id, 'aw_parent_subscription_length', $subscription_length, true );
+
+    //Sets next payment time 1 month later minus 5 hours to account for server time and payment won't go to the next day if created after 19h
+    $end_date = date("Y-m-d", strtotime("+$resubscription_months month -5 hour")).' 12:00:00';
 
     
     $subscription->update_dates(array('end' => $end_date));
     //Automatewoo log
-    $workflow->log_action_note( $workflow , __( 'End date updated to: '.$end_date, 'automatewoo' ) );
+    $workflow->log_action_note( $workflow , __( 'End date updated to: '.$end_date.' by '.$resubscription_months.' months', 'automatewoo' ) );
     //Leave note
-    $subscription->add_order_note('End date updated to: '.$next_month);
+    //$subscription->add_order_note('End date updated to: '.$next_month);
        
 }
