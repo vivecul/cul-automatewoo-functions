@@ -100,20 +100,6 @@ function my_automatewoo_change_late_payment_status( $workflow ) {
 }
 
 /**
- * Custom function to add subscription meta data with the number of periods in the whole subscription
- * @param $workflow AutomateWoo\Workflow
- */
-function my_automatewoo_subscription_length_meta( $workflow ) {
-    $subscription = $workflow->data_layer()->get_subscription();
-    $subscription_length = wcs_estimate_periods_between( $subscription->get_time( 'start' ), $subscription->get_time( 'end' ), $subscription->get_billing_period() );
-    
-    add_post_meta( $subscription->get_id(), 'aw_subscription_length', $subscription_length, true );
-
-    $workflow->log_action_note( $workflow , __( 'subscription length is: '.$subscription_length, 'automatewoo' ) );
-}
-
-
-/**
  * Custom function to change subscription status to wc-expired-offer when and offer is completed and log offer id and order id in the subscription metadata
  * @param $workflow AutomateWoo\Workflow
  */
@@ -271,6 +257,88 @@ function update_next_payment_date( $workflow ) {
        
 }
 
+/**
+ * Custom function to add subscription meta data with the number of periods in the current subscription
+ * @param $workflow AutomateWoo\Workflow
+ */
+function my_automatewoo_subscription_length_meta( $workflow ) {
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_length = wcs_estimate_periods_between( $subscription->get_time( 'start' ), $subscription->get_time( 'end' ), $subscription->get_billing_period() );
+
+     if(metadata_exists('post', $subscription_id, 'aw_mp_renter')){
+        $mp_renter = get_metadata( 'post', $subscription_id, 'aw_mp_renter', true );
+    }
+    else {
+        $mp_renter = 'cul';
+    }
+    
+     // Get al rules for non marketplace and each marketplace player
+    /*
+    * Rules for CUL (non marketplace)
+    * 6 Months resubscribes 6 months
+    * 9 Months resubscribes 5 months 
+    * 12 Months resubscribes 4 months 
+    * 18 Months resubscribes to 0 months 
+    **/
+    if ($mp_renter == 'cul'){
+        
+        if ($subscription_length == '6'){
+            $resubscription_months = 6;
+        }
+        else if ($subscription_length == '9'){
+            $resubscription_months = 5;
+        }
+        else if ($subscription_length == '12'){
+            $resubscription_months = 4;
+        }
+        else if ($subscription_length == '18'){
+            $resubscription_months = 0;
+        }
+    }
+    
+    /*
+    * Rules for Rayco (marketplace)
+    * 6 Months resubscribes 6 months
+    * 9 Months resubscribes 5 months 
+    * 12 Months resubscribes 4 months 
+    * 18 Months resubscribes to 4 months 
+    * 24 Months resubscribes to 4 months 
+    * 30 Months resubscribes to 4 months 
+    **/
+    else if ($mp_renter == 'rayco'){
+        
+        if ($subscription_length == '6'){
+            $resubscription_months = 6;
+        }
+        else if ($subscription_length == '9'){
+            $resubscription_months = 5;
+        }
+        else if ($subscription_length == '12'){
+            $resubscription_months = 4;
+        }
+        else if ($subscription_length == '18'){
+            $resubscription_months = 4;
+        }
+        else if ($subscription_length == '24'){
+            $resubscription_months = 4;
+        }
+        else if ($subscription_length == '34'){
+            $resubscription_months = 4;
+        }
+    }
+    
+    
+    add_post_meta( $subscription->get_id(), 'aw_subscription_length', $subscription_length, true );
+
+    add_post_meta( $subscription->get_id(), 'aw_resubscription_length', $resubscription_months, true );
+
+    $workflow->log_action_note( $workflow , __( 'Renter is'.$mp_renter.' subscription length is: '.$subscription_length.' and resubscription length is: '.$resubscription_months, 'automatewoo' ) );
+}
+
+/**
+ * Custom function to add subscription meta data with the number of periods in the resubscription
+ * @param $workflow AutomateWoo\Workflow
+ */
 function update_next_end_date_for_rescubscribe( $workflow ) {
     //get subscription id from data layer
     $subscription = $workflow->data_layer()->get_subscription();
@@ -312,7 +380,7 @@ function update_next_end_date_for_rescubscribe( $workflow ) {
             $resubscription_months = 4;
         }
     }
-    // Get al rules for non marketplace and each marketplace player
+    
     /*
     * Rules for Rayco (marketplace)
     * 6 Months resubscribes 6 months
