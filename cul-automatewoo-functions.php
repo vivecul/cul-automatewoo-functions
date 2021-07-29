@@ -437,7 +437,7 @@ function aw_update_username_to_doc_id( $workflow ) {
     $user_id = get_post_meta( $subscription_id, '_customer_user', true );
     
     //get document id from postmeta of order
-    $document_id = get_post_meta( $offer_id, '_billing_docid', true );
+    $document_id = get_post_meta( $subscription_id, '_billing_docid', true );
 
     if (isset($document_id)) {
         global $wpdb;
