@@ -439,13 +439,20 @@ function aw_update_username_to_doc_id( $workflow ) {
     //get document id from postmeta of order
     $document_id = get_post_meta( $offer_id, 'offer_subscription_id', true );
 
-    global $wpdb;
-    $wpdb->update(
-        $wpdb->users, 
-        ['user_login' => $document_id], 
-        ['ID' => $user_id]
-    );
+    if (isset($document_id)) {
+        global $wpdb;
+        $wpdb->update(
+            $wpdb->users, 
+            ['user_login' => $document_id], 
+            ['ID' => $user_id]
+        );
+        
+        //Automatewoo log
+        $workflow->log_action_note( $workflow , __( 'Username changed to Document ID # '.$document_id. ' For user: '.$user_id.' On placed Subscription id: '.$subscription_id, 'automatewoo' ) );
+    }
 
-    //Automatewoo log
-    $workflow->log_action_note( $workflow , __( 'Username changed to Document ID # '.$document_id. ' For user: '.$user_id.' On placed Subscription id: '.$subscription_id, 'automatewoo' ) );
+    else {
+        //Automatewoo log
+        $workflow->log_action_note( $workflow , __( 'No Document ID to change', 'automatewoo' ) );
+    }
 }
