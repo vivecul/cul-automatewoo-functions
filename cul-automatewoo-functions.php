@@ -456,3 +456,96 @@ function aw_update_username_to_doc_id( $workflow ) {
         $workflow->log_action_note( $workflow , __( 'No Document ID to change', 'automatewoo' ) );
     }
 }
+
+
+function aw_send_wati_data ( $workflow ) {
+    //get subscription id from data layer
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_id = $subscription->get_id();
+
+    //get user id from subscription
+    $user_id = get_post_meta( $subscription_id, '_customer_user', true );
+
+    //get all user subscriptions
+    $users_subscriptions = wcs_get_users_subscriptions($user_id);
+    foreach ($users_subscriptions as $subscription){
+      if ($subscription->has_status(array('active','on-hold','late-payment-30','late-payment-60','late-payment-90','late-payment-120','late-payment-150','late-payment-180','expired','expired-offer'))) {
+             $all_subscriptions .= $subscription->get_id().","; 
+      }
+    }
+    
+    //get information from postmeta of subscription
+    $document_id = get_post_meta( $subscription_id, '_billing_docid', true );
+    $document_type = get_post_meta( $subscription_id, '_billing_typedoc', true );
+    $first_name = get_post_meta( $subscription_id, '_billing_first_name', true );
+    $last_name = get_post_meta( $subscription_id, '_billing_last_name', true );
+    $email = get_post_meta( $subscription_id, '_billing_email', true );
+    $phone = str_replace("+", "", get_post_meta( $subscription_id, '_billing_phone', true ));
+    $city = get_post_meta( $subscription_id, '_billing_city', true );
+    $mp_rent = get_post_meta( $subscription_id, 'aw_mp_renter', true );
+
+
+    $url = "https://live-server-2438.wati.io/api/v1/updateContactAttributes/".$phone;
+
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+    $headers = array(
+       "Accept: application/json",
+       "Content-Type: application/json",
+       "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyMmYwMzg0Mi01MzUyLTQwNzctOTlmNS0zMDczZTJkYjA2YTkiLCJ1bmlxdWVfbmFtZSI6ImhvbGFAdml2ZWN1bC5jb20iLCJuYW1laWQiOiJob2xhQHZpdmVjdWwuY29tIiwiZW1haWwiOiJob2xhQHZpdmVjdWwuY29tIiwiYXV0aF90aW1lIjoiMDgvMDYvMjAyMSAxNTowMDoyMyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFETUlOSVNUUkFUT1IiLCJleHAiOjI1MzQwMjMwMDgwMCwiaXNzIjoiQ2xhcmVfQUkiLCJhdWQiOiJDbGFyZV9BSSJ9.yYvYcpSaCODUaOnjmXKX2UZ18-Z5OOOUBZ-6bLW83ps",
+    );
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+    $data = <<<DATA
+    {
+      "customParams": [
+        {
+          "name": "subscriptions",
+          "value": "$all_subscriptions"
+        },
+        {
+          "name": "document_id",
+          "value": "$document_id"
+        },
+        {
+          "name": "document_type",
+          "value": "$document_type"
+        },
+        {
+          "name": "email",
+          "value": "$email"
+        },
+        {
+          "name": "city",
+          "value": "$city"
+        },
+        {
+          "name": "mp_rent",
+          "value": "$mp_rent"
+        },
+        {
+          "name": "name",
+          "value": "$first_name $last_name"
+        }
+      ]
+    }
+    DATA;
+
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+
+    //for debug only!
+    //curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+    //curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+    $resp = curl_exec($curl);
+    curl_close($curl);
+    var_dump($resp);
+        
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'Response: '.var_dump($resp).'subs: '.$all_subscriptions.'Data: '.$data, 'automatewoo' ) );
+    
+
+}
