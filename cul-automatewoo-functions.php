@@ -457,7 +457,10 @@ function aw_update_username_to_doc_id( $workflow ) {
     }
 }
 
-
+/**
+ * Custom function to send data to Wati through the API
+ * @param $workflow AutomateWoo\Workflow
+ */
 function aw_send_wati_data ( $workflow ) {
     //get subscription id from data layer
     $subscription = $workflow->data_layer()->get_subscription();
@@ -541,11 +544,11 @@ function aw_send_wati_data ( $workflow ) {
     //curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
     $resp = curl_exec($curl);
+    $response = var_dump($resp);
     curl_close($curl);
-    var_dump($resp);
+    //var_dump($resp);
         
     //Automatewoo log
-    $workflow->log_action_note( $workflow , __( 'Response: '.var_dump($resp).'subs: '.$all_subscriptions.'Data: '.$data, 'automatewoo' ) );
-    
-
+    $workflow->log_action_note( $workflow , __( 'Response: '.$response.'subs: '.$all_subscriptions.'Data: '.$data, 'automatewoo' ) );
 }
+
