@@ -118,6 +118,7 @@ function my_automatewoo_subscrition_status_finalized_offer( $workflow ) {
 
     //change sub status with sub id
     $subscription_obj = wcs_get_subscription($subscription_id);
+    $subscription_obj->update_status( 'expired' );
     $subscription_obj->update_status( 'expired-offer' );
 
     //Add offer and order to subscription postmeta
@@ -544,11 +545,87 @@ function aw_send_wati_data ( $workflow ) {
     //curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
     $resp = curl_exec($curl);
-    $response = var_dump($resp);
     curl_close($curl);
     //var_dump($resp);
         
     //Automatewoo log
-    $workflow->log_action_note( $workflow , __( 'Response: '.$response.'subs: '.$all_subscriptions.'Data: '.$data, 'automatewoo' ) );
+    $workflow->log_action_note( $workflow , __( 'Response: '.var_dump($resp).$phone.'subs: '.$all_subscriptions.'Data: '.$data, 'automatewoo' ) );
 }
 
+/**
+ * Custom function to send pending payment template message throu Wati API
+ * @param $workflow AutomateWoo\Workflow
+ */
+function aw_send_wati_pending_payment ( $workflow ) {
+    //get subscription id from data layer
+    $subscription = $workflow->data_layer()->get_subscription();
+    $subscription_id = $subscription->get_id();
+
+    //get user id from subscription
+    $user_id = get_post_meta( $subscription_id, '_customer_user', true );
+
+    
+    
+    //get information from postmeta of subscription
+    
+    $first_name = get_post_meta( $subscription_id, '_billing_first_name', true );
+    $last_name = get_post_meta( $subscription_id, '_billing_last_name', true );
+    $phone = str_replace("+", "", get_post_meta( $subscription_id, '_billing_phone', true ));
+
+
+    $url = "https://live-server-2438.wati.io/api/v1/sendTemplateMessage/".$phone;
+
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+    $headers = array(
+       "Accept: application/json",
+       "Content-Type: application/json",
+       "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyMmYwMzg0Mi01MzUyLTQwNzctOTlmNS0zMDczZTJkYjA2YTkiLCJ1bmlxdWVfbmFtZSI6ImhvbGFAdml2ZWN1bC5jb20iLCJuYW1laWQiOiJob2xhQHZpdmVjdWwuY29tIiwiZW1haWwiOiJob2xhQHZpdmVjdWwuY29tIiwiYXV0aF90aW1lIjoiMDgvMDYvMjAyMSAxNTowMDoyMyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFETUlOSVNUUkFUT1IiLCJleHAiOjI1MzQwMjMwMDgwMCwiaXNzIjoiQ2xhcmVfQUkiLCJhdWQiOiJDbGFyZV9BSSJ9.yYvYcpSaCODUaOnjmXKX2UZ18-Z5OOOUBZ-6bLW83ps",
+    );
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+    $data = <<<DATA
+    {
+      "template_name": "pending_payment_w",
+      "broadcast_name": "pending_payment_w",
+      "parameters": "[{'name':'name', 'value':'$first_name'}, {'name':'subscription', 'value':'$subscription_id'}]"
+    }
+    DATA;
+
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+
+    //for debug only!
+    //curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+    //curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+    $resp = curl_exec($curl);
+    curl_close($curl);
+    var_dump($resp);
+        
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'Response: '.var_dump($resp).'phone: '.$phone.'Data: '.$data, 'automatewoo' ) );
+}
+
+/**
+ * Custom function to change subscription status to wc-expired-offer when a prypayment is completed.
+ * @param $workflow AutomateWoo\Workflow
+ */
+function my_automatewoo_prepaid_finalize( $workflow ) {
+    //get order id from data layer
+    $order = $workflow->data_layer()->get_order();
+    $order_id = $order->get_id();
+
+    //get sub id from postmeta of offer
+    $subscription_id = get_post_meta( $order_id, 'reantal_prepay_id', true );
+
+    //change sub status with sub id
+    $subscription_obj = wcs_get_subscription($subscription_id);
+    $subscription_obj->update_status( 'expired' );
+    $subscription_obj->update_status( 'expired-offer' );
+    
+    //Automatewoo log
+    $workflow->log_action_note( $workflow , __( 'subscription finalized and moved to finalized with offer (expired-offer) with order id:'.$order_id.' and subscription id: '.$subscription_id, 'automatewoo' ) );
+}
